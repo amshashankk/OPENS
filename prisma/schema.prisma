@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?
+  email         String       @unique
+  password      String
+  bio           String?
+  avatar        String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  bookmarks     Bookmark[]
+  collections   Collection[]
+  downloads     Download[]
+}
+
+model Asset {
+  id            String       @id @default(cuid())
+  title         String
+  description   String?
+  previewUrl    String
+  sourceUrl     String
+  downloadUrl   String?
+  category      String
+  subcategory   String?
+  tags          String
+  license       String
+  fileFormat    String
+  fileSize      Int?
+  width         Int?
+  height        Int?
+  animated      Boolean      @default(false)
+  lottieData    String?
+  downloads     Int          @default(0)
+  views         Int          @default(0)
+  featured      Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  bookmarks     Bookmark[]
+  downloadLogs  Download[]
+
+  @@index([category])
+  @@index([title])
+  @@index([license])
+}
+
+model Bookmark {
+  id            String       @id @default(cuid())
+  userId        String
+  assetId       String
+  collectionId  String?
+  createdAt     DateTime     @default(now())
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset         Asset        @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  collection    Collection?  @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, assetId])
+}
+
+model Collection {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  userId        String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookmarks     Bookmark[]
+}
+
+model Download {
+  id            String       @id @default(cuid())
+  userId        String
+  assetId       String
+  createdAt     DateTime     @default(now())
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset         Asset        @relation(fields: [assetId], references: [id], onDelete: Cascade)
+}
