@@ -29,7 +29,7 @@ let totalAdded = 0;
 
 async function addLordicon() {
   console.log("\n--- LORDICON ANIMATED ICONS ---");
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6NDE3LCJzZWNyZXQiOiJHQVBWVS1nUVdzSWxzMDZPUTBFT1Jwb0EzSmFIejNWMCIsImlhdCI6MTc3NTczNTEzN30.E2BUVLKd95OP7L8CH1jV31rj3oabiM4c6LK0ezjLJPw";
+  const token = process.env.LORDICON_API_TOKEN || "";
   const res = await fetch("https://api.lordicon.com/v1/icons?limit=5000", { headers: { Authorization: `Bearer ${token}` } });
   const icons = await res.json();
 
