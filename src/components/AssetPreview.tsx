@@ -22,8 +22,8 @@ export default function AssetPreview({ previewUrl, downloadUrl, category, title,
     return <LottiePreview url={previewUrl} className={className} style={style} />;
   }
 
-  // For lottie category: if the GIF preview fails, fall back to Lottie player with download URL
-  if (imgFailed && category === "lottie" && downloadUrl?.endsWith(".json")) {
+  // For lottie category: always prefer JSON downloadUrl over heavy GIF preview
+  if (category === "lottie" && downloadUrl) {
     return <LottiePreview url={downloadUrl} className={className} style={style} />;
   }
 
