@@ -72,9 +72,9 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
   const selectedLabel = categoryOptions.find(c => c.value === selectedCategory)?.label || "All Assets";
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative">
       {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-sky-100 via-sky-50 to-white dark:from-gray-900 dark:via-gray-950 dark:to-gray-950" />
+      <div className="absolute inset-0 bg-gradient-to-b from-sky-100 via-sky-50 to-white dark:from-gray-900 dark:via-gray-950 dark:to-gray-950 overflow-hidden" />
 
       <div className="relative max-w-5xl mx-auto text-center px-4 pt-16 pb-20">
         {/* Main heading */}
