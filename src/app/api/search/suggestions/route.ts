@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   for (const cat of categories) {
     const rows = db
       .prepare(
-        "SELECT id, title, previewUrl, category FROM Asset WHERE (title LIKE ? OR tags LIKE ?) AND category = ? ORDER BY downloads DESC LIMIT 3"
+        "SELECT id, title, previewUrl, category FROM Asset WHERE (title LIKE ? OR tags LIKE ?) AND category = ? ORDER BY downloads DESC LIMIT 6"
       )
       .all(like, like, cat) as { id: string; title: string; previewUrl: string; category: string }[];
     if (rows.length > 0) {

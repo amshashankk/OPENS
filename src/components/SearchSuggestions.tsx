@@ -77,7 +77,7 @@ export default function SearchSuggestions({
   return (
     <div
       ref={ref}
-      className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[9999] max-h-[70vh] overflow-y-auto"
+      className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50 max-h-[70vh] overflow-y-auto"
     >
       {loading && !data && (
         <div className="px-4 py-3 text-sm text-gray-400">Searching...</div>
@@ -122,15 +122,15 @@ export default function SearchSuggestions({
                   View all
                 </Link>
               </div>
-              <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
+              <div className="grid grid-cols-6 gap-2 px-4 pb-3">
                 {items.map((item) => (
                   <Link
                     key={item.id}
                     href={`/asset/${item.id}`}
                     onClick={onClose}
-                    className="shrink-0 group"
+                    className="group"
                   >
-                    <div className="w-16 h-16 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-center p-2 group-hover:border-violet-300 dark:group-hover:border-violet-600 transition-colors">
+                    <div className="aspect-square rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-center p-2 group-hover:border-violet-300 dark:group-hover:border-violet-600 transition-colors">
                       <img
                         src={item.previewUrl}
                         alt={item.title}
@@ -138,7 +138,7 @@ export default function SearchSuggestions({
                         loading="lazy"
                       />
                     </div>
-                    <p className="text-[10px] text-gray-500 text-center mt-1 truncate w-16">
+                    <p className="text-[10px] text-gray-500 text-center mt-1 truncate">
                       {item.title}
                     </p>
                   </Link>

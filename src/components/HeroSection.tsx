@@ -108,7 +108,7 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
         {/* Search bar */}
         <motion.form
           onSubmit={handleSearch}
-          className="mt-10 max-w-3xl mx-auto relative z-[100]"
+          className="mt-10 max-w-3xl mx-auto relative z-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.25, ease: "easeOut" }}
@@ -134,7 +134,7 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
               {showCatDropdown && (
                   <div
                     ref={dropdownMenuRef}
-                    className="absolute left-0 top-full mt-2 w-60 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[999]"
+                    className="absolute left-0 top-full mt-2 w-60 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-20"
                   >
                     {categoryOptions.map((opt) => (
                       <button
