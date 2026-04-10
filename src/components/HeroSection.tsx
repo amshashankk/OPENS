@@ -84,7 +84,7 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          Over {totalAssets.toLocaleString()}+ Design Assets
+          Over {totalAssets.toLocaleString("en-US")}+ Design Assets
         </motion.h1>
 
         {/* Subtitle */}
@@ -158,7 +158,7 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
             {/* Search input */}
             <input
               type="text"
-              placeholder={`Search from ${totalAssets.toLocaleString()} Design Assets`}
+              placeholder={`Search from ${totalAssets.toLocaleString("en-US")} Design Assets`}
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
               onFocus={() => { if (searchQuery.length >= 2) setShowSuggestions(true); }}
