@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 interface CategoryData {
   slug: string;
@@ -62,8 +63,14 @@ export default function CategorySection({ categoryCounts, categoryPreviews }: {
   return (
     <section className="py-12">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        {categories.map((cat) => (
-          <Link key={cat.slug} href={`/category/${cat.slug}`}>
+        {categories.map((cat, idx) => (
+          <motion.div
+            key={cat.slug}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: idx * 0.06, ease: "easeOut" }}
+          >
+          <Link href={`/category/${cat.slug}`}>
             <div className={`group relative h-full rounded-2xl bg-gradient-to-b ${cat.gradient} border border-gray-200/60 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-none hover:-translate-y-1 transition-all duration-300`}>
               {/* Text */}
               <div className="p-4 pb-2">
@@ -92,6 +99,7 @@ export default function CategorySection({ categoryCounts, categoryPreviews }: {
               </div>
             </div>
           </Link>
+          </motion.div>
         ))}
       </div>
     </section>

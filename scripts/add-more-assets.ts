@@ -22,7 +22,7 @@ const insert = db.prepare(
 );
 
 const existing = new Set<string>();
-db.prepare("SELECT previewUrl FROM Asset").all().forEach((r: Record<string, unknown>) => existing.add(r.previewUrl as string));
+(db.prepare("SELECT previewUrl FROM Asset").all() as Record<string, unknown>[]).forEach((r) => existing.add(r.previewUrl as string));
 console.log("Existing assets tracked:", existing.size);
 
 let totalAdded = 0;

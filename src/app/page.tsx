@@ -52,7 +52,7 @@ export default function Home() {
     tags: JSON.parse(a.tags as string),
     featured: Boolean(a.featured),
     animated: Boolean(a.animated),
-  });
+  }) as any;
 
   return (
     <div>

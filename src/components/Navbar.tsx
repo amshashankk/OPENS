@@ -13,12 +13,15 @@ import {
   X,
 } from "lucide-react";
 import { useStore } from "@/store/useStore";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import SearchSuggestions from "./SearchSuggestions";
 
 export default function Navbar() {
-  const { user, setUser, darkMode, toggleDarkMode, searchQuery, setSearchQuery } = useStore();
+  const { user, setUser, darkMode, toggleDarkMode } = useStore();
+  const [navSearchQuery, setNavSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -41,10 +44,17 @@ export default function Navbar() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    setShowSuggestions(false);
+    if (navSearchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(navSearchQuery.trim())}`);
     }
   };
+
+  const handleSuggestionSelect = useCallback((term: string) => {
+    setNavSearchQuery(term);
+    setShowSuggestions(false);
+    router.push(`/search?q=${encodeURIComponent(term)}`);
+  }, [router]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -89,16 +99,24 @@ export default function Navbar() {
           </div>
 
           {/* Search - Desktop */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-sm">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-sm relative z-[9999]">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 ref={searchRef}
                 type="text"
                 placeholder="Search icons, illustrations, 3D assets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={navSearchQuery}
+                onChange={(e) => { setNavSearchQuery(e.target.value); setShowSuggestions(true); }}
+                onFocus={() => { if (navSearchQuery.length >= 2) setShowSuggestions(true); }}
+                onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); }}
                 className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all dark:text-white"
+              />
+              <SearchSuggestions
+                query={navSearchQuery}
+                onSelect={handleSuggestionSelect}
+                visible={showSuggestions}
+                onClose={() => setShowSuggestions(false)}
               />
             </div>
           </form>
@@ -135,8 +153,8 @@ export default function Navbar() {
               <input
                 type="text"
                 placeholder="Search assets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={navSearchQuery}
+                onChange={(e) => setNavSearchQuery(e.target.value)}
                 autoFocus
                 className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 dark:text-white"
               />

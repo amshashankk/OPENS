@@ -3,7 +3,9 @@
 import { Search, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/store/useStore";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import SearchSuggestions from "./SearchSuggestions";
 
 const categoryOptions = [
   { value: "", label: "All Assets" },
@@ -16,10 +18,12 @@ const categoryOptions = [
 ];
 
 export default function HeroSection({ totalAssets }: { totalAssets: number }) {
-  const { searchQuery, setSearchQuery } = useStore();
+  const { setSearchQuery: setGlobalSearch } = useStore();
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showCatDropdown, setShowCatDropdown] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const dropdownBtnRef = useRef<HTMLButtonElement>(null);
   const dropdownMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -38,7 +42,10 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
 
   const doSearch = (overrideCategory?: string) => {
     const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set("q", searchQuery.trim());
+    if (searchQuery.trim()) {
+      params.set("q", searchQuery.trim());
+      setGlobalSearch(searchQuery.trim());
+    }
     const cat = overrideCategory !== undefined ? overrideCategory : selectedCategory;
     if (cat) params.set("category", cat);
     router.push(`/search?${params}`);
@@ -46,8 +53,16 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowSuggestions(false);
     doSearch();
   };
+
+  const handleSuggestionSelect = useCallback((term: string) => {
+    setSearchQuery(term);
+    setGlobalSearch(term);
+    setShowSuggestions(false);
+    router.push(`/search?q=${encodeURIComponent(term)}`);
+  }, [router, setSearchQuery, setGlobalSearch]);
 
   const trending = [
     "Loading", "Business", "User Interface", "Arrow", "Heart",
@@ -63,20 +78,41 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
 
       <div className="relative max-w-5xl mx-auto text-center px-4 pt-16 pb-20">
         {/* Main heading */}
-        <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
+        <motion.h1
+          className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-gray-900 dark:text-white leading-tight tracking-tight"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           Over {totalAssets.toLocaleString()}+ Design Assets
-        </h1>
+        </motion.h1>
 
         {/* Subtitle */}
-        <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+        <motion.p
+          className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+        >
           The ultimate open-source marketplace for 3D Icons, Lottie Animations, Vector Illustrations & SVG Icons.
-        </p>
-        <p className="mt-1 text-sm sm:text-base text-gray-500 dark:text-gray-500">
+        </motion.p>
+        <motion.p
+          className="mt-1 text-sm sm:text-base text-gray-500 dark:text-gray-500"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           All free, properly licensed — including Animated Icons, Stickers & Emojis.
-        </p>
+        </motion.p>
 
         {/* Search bar */}
-        <form onSubmit={handleSearch} className="mt-10 max-w-3xl mx-auto">
+        <motion.form
+          onSubmit={handleSearch}
+          className="mt-10 max-w-3xl mx-auto relative z-[100]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25, ease: "easeOut" }}
+        >
           <div className="flex items-center bg-white dark:bg-gray-900 rounded-full border border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-200/50 dark:shadow-none">
             {/* Category dropdown */}
             <div className="relative hidden sm:block">
@@ -124,7 +160,9 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
               type="text"
               placeholder={`Search from ${totalAssets.toLocaleString()} Design Assets`}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
+              onFocus={() => { if (searchQuery.length >= 2) setShowSuggestions(true); }}
+              onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); }}
               className="flex-1 px-5 py-4 text-sm sm:text-base bg-transparent focus:outline-none dark:text-white placeholder-gray-400 min-w-0"
             />
 
@@ -136,16 +174,28 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
               <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
           </div>
-        </form>
+          <SearchSuggestions
+            query={searchQuery}
+            onSelect={handleSuggestionSelect}
+            visible={showSuggestions}
+            onClose={() => setShowSuggestions(false)}
+          />
+        </motion.form>
 
         {/* Trending tags */}
-        <div className="mt-5 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap">
+        <motion.div
+          className="mt-5 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           <span className="text-sm text-gray-400 font-medium">Trending:</span>
           {trending.map((term, i) => (
             <span key={term}>
               <button
                 onClick={() => {
                   setSearchQuery(term);
+                  setGlobalSearch(term);
                   router.push(`/search?q=${encodeURIComponent(term)}`);
                 }}
                 className="text-sm text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
@@ -155,7 +205,7 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
               {i < trending.length - 1 && <span className="text-gray-300 dark:text-gray-600 ml-1">,</span>}
             </span>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

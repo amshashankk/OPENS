@@ -18,8 +18,22 @@ export async function GET(
     "SELECT * FROM Asset WHERE category = ? AND id != ? ORDER BY downloads DESC LIMIT 8"
   ).all(asset.category, id) as Record<string, unknown>[];
 
+  // Get related assets from other categories using tags
+  const tags = JSON.parse(asset.tags as string) as string[];
+  let relatedFromOtherCategories: Record<string, unknown>[] = [];
+  if (tags.length > 0) {
+    const tagConditions = tags.slice(0, 3).map(() => "tags LIKE ?").join(" OR ");
+    const tagParams = tags.slice(0, 3).map((t: string) => `%${t}%`);
+    relatedFromOtherCategories = db.prepare(
+      `SELECT * FROM Asset WHERE category != ? AND id != ? AND (${tagConditions}) ORDER BY downloads DESC LIMIT 12`
+    ).all(asset.category, id, ...tagParams) as Record<string, unknown>[];
+  }
+
+  const parse = (a: Record<string, unknown>) => ({ ...a, tags: JSON.parse(a.tags as string), featured: Boolean(a.featured), animated: Boolean(a.animated) });
+
   return NextResponse.json({
-    asset: { ...asset, tags: JSON.parse(asset.tags as string), featured: Boolean(asset.featured), animated: Boolean(asset.animated) },
-    similar: similar.map((a) => ({ ...a, tags: JSON.parse(a.tags as string), featured: Boolean(a.featured), animated: Boolean(a.animated) })),
+    asset: parse(asset),
+    similar: similar.map(parse),
+    related: relatedFromOtherCategories.map(parse),
   });
 }

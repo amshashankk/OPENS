@@ -97,11 +97,6 @@ export default function AssetCard({ asset }: { asset: Asset }) {
               {asset.downloads}
             </div>
           </div>
-          <div className="flex items-center gap-1 mt-2">
-            <span className="text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-              {asset.license}
-            </span>
-          </div>
         </div>
       </div>
     </Link>

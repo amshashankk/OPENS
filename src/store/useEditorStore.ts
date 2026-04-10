@@ -111,13 +111,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (next.has(i)) next.delete(i);
     else next.add(i);
 
-    // Also update the JSON layers[i].hd flag
+    // Mutate in place — no clone needed, jsonVersion bump triggers re-render
     if (animationJson) {
-      const clone = structuredClone(animationJson);
-      if (clone.layers[i]) {
-        clone.layers[i].hd = next.has(i);
+      if (animationJson.layers[i]) {
+        animationJson.layers[i].hd = next.has(i);
       }
-      set({ hiddenLayers: next, animationJson: clone, jsonVersion: jsonVersion + 1 });
+      set({ hiddenLayers: next, jsonVersion: jsonVersion + 1 });
     } else {
       set({ hiddenLayers: next });
     }
@@ -136,26 +135,23 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setDimensions: (w, h) => {
     const { animationJson, jsonVersion } = get();
     if (!animationJson) return;
-    const clone = structuredClone(animationJson);
-    clone.w = w;
-    clone.h = h;
-    set({ animationJson: clone, dimensions: { w, h }, jsonVersion: jsonVersion + 1 });
+    animationJson.w = w;
+    animationJson.h = h;
+    set({ dimensions: { w, h }, jsonVersion: jsonVersion + 1 });
   },
 
   setFrameRate: (fr) => {
     const { animationJson, jsonVersion } = get();
     if (!animationJson) return;
-    const clone = structuredClone(animationJson);
-    clone.fr = fr;
-    set({ animationJson: clone, frameRate: fr, jsonVersion: jsonVersion + 1 });
+    animationJson.fr = fr;
+    set({ frameRate: fr, jsonVersion: jsonVersion + 1 });
   },
 
   setAnimationName: (name) => {
     const { animationJson, jsonVersion } = get();
     if (!animationJson) return;
-    const clone = structuredClone(animationJson);
-    clone.nm = name;
-    set({ animationJson: clone, animationName: name, jsonVersion: jsonVersion + 1 });
+    animationJson.nm = name;
+    set({ animationName: name, jsonVersion: jsonVersion + 1 });
   },
 
   setBgColor: (hex) => set({ bgColor: hex }),

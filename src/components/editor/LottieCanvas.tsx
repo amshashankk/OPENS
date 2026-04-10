@@ -1,53 +1,76 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, memo } from "react";
 import lottie, { AnimationItem } from "lottie-web";
 import { useEditorStore } from "@/store/useEditorStore";
 
-export default function LottieCanvas() {
+function LottieCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<AnimationItem | null>(null);
+  const pendingReloadRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
     animationJson, jsonVersion, bgColor, isPlaying, speed, loop, direction,
     setCurrentFrame, setPlaying, totalFrames,
   } = useEditorStore();
 
-  // Load/reload animation when JSON changes
+  // Load/reload animation when JSON changes — debounced to avoid rapid re-inits
   useEffect(() => {
     if (!containerRef.current || !animationJson) return;
 
-    // Destroy previous
-    if (animRef.current) {
-      animRef.current.destroy();
-      animRef.current = null;
-    }
+    // Debounce reloads: wait 150ms before re-initializing
+    if (pendingReloadRef.current) clearTimeout(pendingReloadRef.current);
 
-    const anim = lottie.loadAnimation({
-      container: containerRef.current,
-      renderer: "svg",
-      loop,
-      autoplay: isPlaying,
-      animationData: structuredClone(animationJson),
-    });
+    pendingReloadRef.current = setTimeout(() => {
+      if (!containerRef.current) return;
 
-    anim.setSpeed(speed);
-    anim.setDirection(direction);
+      // Destroy previous
+      if (animRef.current) {
+        animRef.current.destroy();
+        animRef.current = null;
+      }
 
-    anim.addEventListener("enterFrame", () => {
-      setCurrentFrame(Math.floor(anim.currentFrame));
-    });
+      const anim = lottie.loadAnimation({
+        container: containerRef.current,
+        renderer: "canvas", // canvas is faster than SVG for complex animations
+        loop,
+        autoplay: isPlaying,
+        animationData: animationJson, // no clone needed — lottie-web doesn't mutate
+      });
 
-    anim.addEventListener("complete", () => {
-      if (!loop) setPlaying(false);
-    });
+      anim.setSpeed(speed);
+      anim.setDirection(direction);
 
-    animRef.current = anim;
+      // Throttle enterFrame updates to ~15fps for the UI counter
+      let lastFrameUpdate = 0;
+      anim.addEventListener("enterFrame", () => {
+        const now = performance.now();
+        if (now - lastFrameUpdate > 66) { // ~15fps
+          setCurrentFrame(Math.floor(anim.currentFrame));
+          lastFrameUpdate = now;
+        }
+      });
+
+      anim.addEventListener("complete", () => {
+        if (!loop) setPlaying(false);
+      });
+
+      animRef.current = anim;
+    }, 100);
 
     return () => {
-      anim.destroy();
-      animRef.current = null;
+      if (pendingReloadRef.current) clearTimeout(pendingReloadRef.current);
     };
   }, [jsonVersion, animationJson]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animRef.current) {
+        animRef.current.destroy();
+        animRef.current = null;
+      }
+    };
+  }, []);
 
   // Sync play/pause
   useEffect(() => {
@@ -75,7 +98,6 @@ export default function LottieCanvas() {
   const scrubTo = useEditorStore((s) => s.currentFrame);
   const prevScrubRef = useRef(scrubTo);
   useEffect(() => {
-    // Only scrub if the frame was set externally (not from enterFrame)
     if (animRef.current && !isPlaying && scrubTo !== prevScrubRef.current) {
       animRef.current.goToAndStop(scrubTo, true);
     }
@@ -100,3 +122,5 @@ export default function LottieCanvas() {
     </div>
   );
 }
+
+export default memo(LottieCanvas);
