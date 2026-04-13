@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { parseTags } from "@/lib/parseTags";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
   const assets = db.prepare(`SELECT * FROM Asset${where} ORDER BY downloads DESC LIMIT ? OFFSET ?`).all(...params, limit, offset) as Record<string, unknown>[];
 
   return NextResponse.json({
-    assets: assets.map((a) => ({ ...a, tags: JSON.parse(a.tags as string), featured: Boolean(a.featured), animated: Boolean(a.animated) })),
+    assets: assets.map((a) => ({ ...a, tags: parseTags(a.tags), featured: Boolean(a.featured), animated: Boolean(a.animated) })),
     total,
     page,
     totalPages: Math.ceil(total / limit),

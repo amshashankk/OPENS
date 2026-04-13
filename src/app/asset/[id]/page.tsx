@@ -98,7 +98,29 @@ export default function AssetDetailPage() {
         url = base;
       }
     }
-    window.open(url, "_blank");
+    // Force download instead of opening in browser
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      const ext = format?.startsWith("PNG") ? "png" : url.endsWith(".json") ? "json" : "svg";
+      a.download = `${(asset.title || "asset").replace(/[^a-zA-Z0-9]/g, "-")}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback if fetch fails (e.g. CORS)
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = asset.title || "download";
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
     setShowLicense(false);
   };
 

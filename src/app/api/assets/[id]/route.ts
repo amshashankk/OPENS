@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { parseTags } from "@/lib/parseTags";
 
 export async function GET(
   _request: NextRequest,
@@ -19,7 +20,7 @@ export async function GET(
   ).all(asset.category, id) as Record<string, unknown>[];
 
   // Get related assets from other categories using tags
-  const tags = JSON.parse(asset.tags as string) as string[];
+  const tags = parseTags(asset.tags);
   let relatedFromOtherCategories: Record<string, unknown>[] = [];
   if (tags.length > 0) {
     const tagConditions = tags.slice(0, 3).map(() => "tags LIKE ?").join(" OR ");
@@ -29,7 +30,7 @@ export async function GET(
     ).all(asset.category, id, ...tagParams) as Record<string, unknown>[];
   }
 
-  const parse = (a: Record<string, unknown>) => ({ ...a, tags: JSON.parse(a.tags as string), featured: Boolean(a.featured), animated: Boolean(a.animated) });
+  const parse = (a: Record<string, unknown>) => ({ ...a, tags: parseTags(a.tags), featured: Boolean(a.featured), animated: Boolean(a.animated) });
 
   return NextResponse.json({
     asset: parse(asset),

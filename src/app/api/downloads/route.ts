@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { parseTags } from "@/lib/parseTags";
 import { randomBytes } from "crypto";
 
 export async function POST(request: NextRequest) {
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     downloadUrl: asset.downloadUrl || asset.sourceUrl,
-    asset: { ...asset, tags: JSON.parse(asset.tags as string) },
+    asset: { ...asset, tags: parseTags(asset.tags) },
   });
 }
 
@@ -37,7 +38,7 @@ export async function GET() {
 
   return NextResponse.json({
     downloads: downloads.map((d) => ({
-      asset: { ...d, tags: JSON.parse(d.tags as string), featured: Boolean(d.featured), animated: Boolean(d.animated) },
+      asset: { ...d, tags: parseTags(d.tags), featured: Boolean(d.featured), animated: Boolean(d.animated) },
     })),
   });
 }

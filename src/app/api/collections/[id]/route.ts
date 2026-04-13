@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { parseTags } from "@/lib/parseTags";
 
 export async function GET(
   _request: NextRequest,
@@ -35,7 +36,7 @@ export async function GET(
           title: b.title,
           previewUrl: b.previewUrl,
           category: b.category,
-          tags: JSON.parse(b.tags as string),
+          tags: parseTags(b.tags),
           license: b.license,
           fileFormat: b.fileFormat,
           downloads: b.downloads,

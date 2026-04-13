@@ -3,6 +3,7 @@ import CategorySection from "@/components/CategorySection";
 import HomeSections from "@/components/HomeSections";
 import { db } from "@/lib/db";
 import { CATEGORIES } from "@/lib/categories";
+import { parseTags } from "@/lib/parseTags";
 
 export default function Home() {
   // Total asset count
@@ -49,7 +50,7 @@ export default function Home() {
 
   const parse = (a: Record<string, unknown>) => ({
     ...a,
-    tags: JSON.parse(a.tags as string),
+    tags: parseTags(a.tags),
     featured: Boolean(a.featured),
     animated: Boolean(a.animated),
   }) as any;

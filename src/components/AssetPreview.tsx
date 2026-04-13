@@ -14,8 +14,17 @@ interface AssetPreviewProps {
   style?: React.CSSProperties;
 }
 
+// Proxy icons8 URLs through our API to avoid hotlink blocking
+function proxyUrl(url: string): string {
+  if (url.includes("icons8.com")) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+}
+
 export default function AssetPreview({ previewUrl, downloadUrl, category, title, className, style }: AssetPreviewProps) {
   const [imgFailed, setImgFailed] = useState(false);
+  const resolvedUrl = proxyUrl(previewUrl);
 
   // If preview URL is a JSON file, use Lottie player directly
   if (previewUrl.endsWith(".json")) {
@@ -45,7 +54,7 @@ export default function AssetPreview({ previewUrl, downloadUrl, category, title,
   // Default: regular image with error fallback
   return (
     <img
-      src={previewUrl}
+      src={resolvedUrl}
       alt={title}
       className={`object-contain ${className || ""}`}
       style={style}
