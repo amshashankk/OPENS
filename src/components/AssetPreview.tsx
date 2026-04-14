@@ -22,7 +22,7 @@ function proxyUrl(url: string): string {
   return url;
 }
 
-export default function AssetPreview({ previewUrl, downloadUrl, category, title, className, style }: AssetPreviewProps) {
+export default function AssetPreview({ previewUrl, downloadUrl, category, title, className, style, isHovered }: AssetPreviewProps & { isHovered?: boolean }) {
   const [imgFailed, setImgFailed] = useState(false);
   const resolvedUrl = proxyUrl(previewUrl);
 
@@ -33,7 +33,7 @@ export default function AssetPreview({ previewUrl, downloadUrl, category, title,
 
   // For lottie category: always prefer JSON downloadUrl over heavy GIF preview
   if (category === "lottie" && downloadUrl) {
-    return <LottiePreview url={downloadUrl} className={className} style={style} />;
+    return <LottiePreview url={downloadUrl} className={className} style={style} isHovered={isHovered} />;
   }
 
   // For animated icons with SVG: use object tag for live animation

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Download } from "lucide-react";
 import AssetPreview from "./AssetPreview";
@@ -18,9 +19,14 @@ interface Asset {
 }
 
 function AssetCardClean({ asset }: { asset: Asset }) {
+  const [hovered, setHovered] = useState(false);
   return (
     <Link href={`/asset/${asset.id}`}>
-      <div className="group relative bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-none hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200">
+      <div
+        className="group relative bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-none hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
         {/* Preview — clean, large, centered */}
         <div className="aspect-square bg-gray-50/50 dark:bg-gray-800/30 flex items-center justify-center p-5 relative">
           <AssetPreview
@@ -30,6 +36,7 @@ function AssetCardClean({ asset }: { asset: Asset }) {
             title={asset.title}
             className="group-hover:scale-105 transition-transform duration-300"
             style={{ width: '75%', height: '75%' }}
+            isHovered={hovered}
           />
 
           {/* Hover overlay with actions */}

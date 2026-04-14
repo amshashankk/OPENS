@@ -1,13 +1,22 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Lottie from "lottie-react";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
 
-export default function LottiePreview({ url, className, style }: { url: string; className?: string; style?: React.CSSProperties }) {
+interface LottiePreviewProps {
+  url: string;
+  className?: string;
+  style?: React.CSSProperties;
+  alwaysPlay?: boolean;
+  isHovered?: boolean;
+}
+
+export default function LottiePreview({ url, className, style, alwaysPlay, isHovered }: LottiePreviewProps) {
   const [data, setData] = useState<object | null>(null);
   const [error, setError] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
 
   // Only load when visible in viewport
   useEffect(() => {
@@ -41,6 +50,16 @@ export default function LottiePreview({ url, className, style }: { url: string; 
     return () => { cancelled = true; };
   }, [url, isVisible]);
 
+  // Play/pause based on hover or alwaysPlay
+  useEffect(() => {
+    if (!lottieRef.current || !data || alwaysPlay) return;
+    if (isHovered) {
+      lottieRef.current.play();
+    } else {
+      lottieRef.current.goToAndStop(0, true);
+    }
+  }, [isHovered, alwaysPlay, data]);
+
   if (error) {
     return (
       <div ref={containerRef} className={className} style={style}>
@@ -68,7 +87,13 @@ export default function LottiePreview({ url, className, style }: { url: string; 
 
   return (
     <div ref={containerRef} className={className} style={style}>
-      <Lottie animationData={data} loop autoplay style={{ width: "100%", height: "100%" }} />
+      <Lottie
+        lottieRef={lottieRef}
+        animationData={data}
+        loop
+        autoplay={!!alwaysPlay}
+        style={{ width: "100%", height: "100%" }}
+      />
     </div>
   );
 }

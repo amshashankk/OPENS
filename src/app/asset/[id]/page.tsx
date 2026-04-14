@@ -194,6 +194,7 @@ export default function AssetDetailPage() {
             <LottiePreview
               url={asset.previewUrl.endsWith(".json") ? asset.previewUrl : asset.downloadUrl!}
               style={{ width: '70%', height: '70%' }}
+              alwaysPlay
             />
           ) : asset.category === "animated-icons" && asset.previewUrl.endsWith(".svg") ? (
             <object

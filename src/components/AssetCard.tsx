@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Heart, Download } from "lucide-react";
 import { useStore } from "@/store/useStore";
@@ -52,9 +53,15 @@ export default function AssetCard({ asset }: { asset: Asset }) {
     return colors[category] || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400";
   };
 
+  const [hovered, setHovered] = useState(false);
+
   return (
     <Link href={`/asset/${asset.id}`}>
-      <div className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-xl hover:shadow-violet-500/5 hover:border-violet-200 dark:hover:border-violet-800 transition-all duration-300">
+      <div
+        className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-xl hover:shadow-violet-500/5 hover:border-violet-200 dark:hover:border-violet-800 transition-all duration-300"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
         {/* Preview */}
         <div className="aspect-square bg-gray-50 dark:bg-gray-800/50 p-6 flex items-center justify-center overflow-hidden relative">
           <AssetPreview
@@ -64,6 +71,7 @@ export default function AssetCard({ asset }: { asset: Asset }) {
             title={asset.title}
             className="group-hover:scale-110 transition-transform duration-500"
             style={{ width: '60%', height: '60%' }}
+            isHovered={hovered}
           />
 
           {/* Overlay actions */}
