@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { CATEGORIES } from "@/lib/categories";
 import { parseTags } from "@/lib/parseTags";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   // Total asset count
   const totalAssets = (db.prepare("SELECT COUNT(*) as c FROM Asset").get() as { c: number }).c;

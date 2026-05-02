@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const url = req.nextUrl.searchParams.get("url");
+  const download = req.nextUrl.searchParams.get("download");
+  const filename = req.nextUrl.searchParams.get("filename");
+
   if (!url) return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
 
-  // Only proxy allowed domains
-  const allowed = ["img.icons8.com", "icons8.com", "maxst.icons8.com"];
+  // Allow proxy for known safe domains
+  const allowed = ["img.icons8.com", "icons8.com", "maxst.icons8.com", "api.iconify.design", "www.svgrepo.com", "svgrepo.com"];
   try {
     const parsed = new URL(url);
     if (!allowed.some(d => parsed.hostname.endsWith(d))) {
@@ -28,16 +31,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `Upstream error: ${response.status}` }, { status: response.status });
     }
 
-    const contentType = response.headers.get("content-type") || "image/png";
+    const contentType = response.headers.get("content-type") || "image/svg+xml";
     const buffer = await response.arrayBuffer();
 
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+    const headers: Record<string, string> = {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
+      "Access-Control-Allow-Origin": "*",
+    };
+
+    // Force download if requested
+    if (download) {
+      const fname = filename || "download.svg";
+      headers["Content-Disposition"] = `attachment; filename="${fname}"`;
+    }
+
+    return new NextResponse(buffer, { headers });
   } catch (e) {
     return NextResponse.json({ error: "Failed to fetch image" }, { status: 502 });
   }

@@ -44,7 +44,7 @@ function AssetCardClean({ asset }: { asset: Asset }) {
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <div className="flex gap-1">
               <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(asset.downloadUrl || asset.previewUrl, '_blank'); }}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); const url = asset.downloadUrl || asset.previewUrl; const fname = `${(asset.title || "asset").replace(/[^a-zA-Z0-9]/g, "-")}.svg`; const a = document.createElement("a"); a.href = `/api/proxy-image?url=${encodeURIComponent(url)}&download=1&filename=${encodeURIComponent(fname)}`; a.download = fname; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}
                 className="p-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 shadow-sm border border-gray-200/50 dark:border-gray-700/50 hover:bg-violet-500 hover:text-white hover:border-violet-500 text-gray-600 dark:text-gray-400 transition-all"
                 title="Download"
               >
