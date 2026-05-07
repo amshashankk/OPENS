@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCachedFetch } from "@/lib/useCachedFetch";
 import {
   Download,
   ExternalLink,
@@ -59,26 +60,20 @@ export default function AssetDetailPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
   const { user, bookmarkedAssetIds, addBookmark, removeBookmark, openLoginModal } = useStore();
-  const [asset, setAsset] = useState<AssetDetail | null>(null);
-  const [similar, setSimilar] = useState([]);
-  const [related, setRelated] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [showLicense, setShowLicense] = useState(false);
 
-  const isBookmarked = asset ? bookmarkedAssetIds.has(asset.id) : false;
+  const { data, loading: fetchLoading } = useCachedFetch<{
+    asset: AssetDetail;
+    similar: AssetDetail[];
+    related: AssetDetail[];
+  }>(`/api/assets/${id}`, { freshFor: 5 * 60_000 });
 
-  useEffect(() => {
-    setLoading(true);
-    fetch(`/api/assets/${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setAsset(data.asset);
-        setSimilar(data.similar || []);
-        setRelated(data.related || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [id]);
+  const asset = data?.asset || null;
+  const similar = data?.similar || [];
+  const related = data?.related || [];
+  const loading = fetchLoading && !data;
+
+  const isBookmarked = asset ? bookmarkedAssetIds.has(asset.id) : false;
 
   const handleDownload = async (format?: string) => {
     if (!asset) return;

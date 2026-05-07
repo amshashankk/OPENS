@@ -7,7 +7,7 @@ const LottiePreview = dynamic(() => import("./LottiePreview"), { ssr: false });
 
 interface AssetPreviewProps {
   previewUrl: string;
-  downloadUrl?: string;
+  downloadUrl?: string | null;
   category: string;
   title: string;
   className?: string;
