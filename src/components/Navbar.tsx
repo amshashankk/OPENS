@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Search,
-  Moon,
-  Sun,
   User,
   LogOut,
   Bookmark,
@@ -17,7 +15,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import SearchSuggestions from "./SearchSuggestions";
 
 export default function Navbar() {
-  const { user, setUser, darkMode, toggleDarkMode } = useStore();
+  const { user, setUser } = useStore();
   const [navSearchQuery, setNavSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -33,14 +31,6 @@ export default function Navbar() {
       })
       .catch(() => {});
   }, [setUser]);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,17 +119,6 @@ export default function Navbar() {
               className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               <Search className="w-5 h-5 dark:text-gray-300" />
-            </button>
-
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              {darkMode ? (
-                <Sun className="w-5 h-5 text-amber-500" />
-              ) : (
-                <Moon className="w-5 h-5 text-gray-600" />
-              )}
             </button>
 
           </div>
