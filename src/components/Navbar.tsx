@@ -15,7 +15,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import SearchSuggestions from "./SearchSuggestions";
 
 export default function Navbar() {
-  const { user, setUser } = useStore();
+  const { user, setUser, openLoginModal } = useStore();
   const [navSearchQuery, setNavSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -159,12 +159,12 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link
-                href="/auth/login"
+              <button
+                onClick={openLoginModal}
                 className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors"
               >
                 Log in
-              </Link>
+              </button>
             )}
           </div>
         </div>
