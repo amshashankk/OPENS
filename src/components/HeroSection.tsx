@@ -89,20 +89,12 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
 
         {/* Subtitle */}
         <motion.p
-          className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed"
+          className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
         >
-          The ultimate open-source marketplace for 3D Icons, Lottie Animations, Vector Illustrations & SVG Icons.
-        </motion.p>
-        <motion.p
-          className="mt-1 text-sm sm:text-base text-gray-500 dark:text-gray-500"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          All free, properly licensed — including Animated Icons, Stickers & Emojis.
+          The ultimate open-source marketplace for 3D Icons, Lottie Animations, Vector Illustrations, SVG Icons, Stickers & Emojis — all free and properly licensed.
         </motion.p>
 
         {/* Search bar */}

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
+import LikeButton from "./LikeButton";
 
 export default function Footer() {
   return (
@@ -73,9 +74,10 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-200 dark:border-gray-800 mt-10 pt-6 text-center">
+        <div className="border-t border-gray-200 dark:border-gray-800 mt-10 pt-6 flex flex-col items-center gap-3">
+          <LikeButton />
           <p className="text-sm text-gray-400">
-            OPENS - Open-Source Design Asset Aggregator
+            Made with <span aria-label="love" className="text-rose-500">♥</span> by Shashank Kesarwani
           </p>
         </div>
       </div>
