@@ -75,7 +75,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-200 dark:border-gray-800 mt-10 pt-6 text-center">
           <p className="text-sm text-gray-400">
-            OPENS - Open-Source Design Asset Aggregator
+            Made with <span aria-label="love" className="text-rose-500">♥</span> by Shashank Kesarwani
           </p>
         </div>
       </div>
