@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { dbGet, dbRun } from "@/lib/db";
 import { hashPassword, createToken } from "@/lib/auth";
 import { randomBytes } from "crypto";
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Email and password required" }, { status: 400 });
   }
 
-  const existing = db.prepare("SELECT id FROM User WHERE email = ?").get(email);
+  const existing = await dbGet("SELECT id FROM User WHERE email = ?", [email]);
   if (existing) {
     return NextResponse.json({ error: "Email already registered" }, { status: 409 });
   }
@@ -20,9 +20,10 @@ export async function POST(request: NextRequest) {
   const hashed = await hashPassword(password);
   const now = new Date().toISOString();
 
-  db.prepare(
-    "INSERT INTO User (id, name, email, password, bio, avatar, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-  ).run(id, name || null, email, hashed, null, null, now, now);
+  await dbRun(
+    "INSERT INTO User (id, name, email, password, bio, avatar, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    [id, name || null, email, hashed, null, null, now, now]
+  );
 
   const user = { id, name: name || null, email, bio: null, avatar: null };
 

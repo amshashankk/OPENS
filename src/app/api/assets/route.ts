@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { dbGet, dbAll } from "@/lib/db";
 import { parseTags } from "@/lib/parseTags";
 
 export async function GET(request: NextRequest) {
@@ -31,8 +31,9 @@ export async function GET(request: NextRequest) {
 
   query += " ORDER BY createdAt DESC LIMIT ? OFFSET ?";
 
-  const total = (db.prepare(countQuery).get(...params) as { count: number }).count;
-  const assets = db.prepare(query).all(...params, limit, offset) as Record<string, unknown>[];
+  const totalRow = await dbGet<{ count: number }>(countQuery, params);
+  const total = totalRow?.count ?? 0;
+  const assets = await dbAll<Record<string, unknown>>(query, [...params, limit, offset]);
 
   return NextResponse.json({
     assets: assets.map((a) => ({ ...a, tags: parseTags(a.tags), featured: Boolean(a.featured), animated: Boolean(a.animated) })),

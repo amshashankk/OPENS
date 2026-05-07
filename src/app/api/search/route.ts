@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { dbGet, dbAll } from "@/lib/db";
 import { parseTags } from "@/lib/parseTags";
 
 export async function GET(request: NextRequest) {
@@ -35,8 +35,15 @@ export async function GET(request: NextRequest) {
 
   const where = conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : "";
 
-  const total = (db.prepare(`SELECT COUNT(*) as count FROM Asset${where}`).get(...params) as { count: number }).count;
-  const assets = db.prepare(`SELECT * FROM Asset${where} ORDER BY downloads DESC LIMIT ? OFFSET ?`).all(...params, limit, offset) as Record<string, unknown>[];
+  const totalRow = await dbGet<{ count: number }>(
+    `SELECT COUNT(*) as count FROM Asset${where}`,
+    params
+  );
+  const total = totalRow?.count ?? 0;
+  const assets = await dbAll<Record<string, unknown>>(
+    `SELECT * FROM Asset${where} ORDER BY downloads DESC LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
+  );
 
   return NextResponse.json({
     assets: assets.map((a) => ({ ...a, tags: parseTags(a.tags), featured: Boolean(a.featured), animated: Boolean(a.animated) })),
