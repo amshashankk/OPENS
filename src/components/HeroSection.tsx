@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/store/useStore";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import SearchSuggestions from "./SearchSuggestions";
+
+const LottiePreview = dynamic(() => import("./LottiePreview"), { ssr: false });
 
 const categoryOptions = [
   { value: "", label: "All Assets" },
@@ -76,26 +79,39 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-100 via-sky-50 to-white dark:from-gray-900 dark:via-gray-950 dark:to-gray-950 overflow-hidden" />
 
-      <div className="relative max-w-5xl mx-auto text-center px-4 pt-16 pb-20">
-        {/* Main heading */}
-        <motion.h1
-          className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-gray-900 dark:text-white leading-tight tracking-tight"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          Over {totalAssets.toLocaleString("en-US")}+ Design Assets
-        </motion.h1>
+      <div className="relative max-w-6xl mx-auto px-4 pt-10 pb-16">
+        {/* Headline row: text left, Lottie right (stacks on mobile) */}
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] items-center gap-8 md:gap-10 text-center md:text-left">
+          <div>
+            <motion.h1
+              className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-gray-900 dark:text-white leading-tight tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              Over {totalAssets.toLocaleString("en-US")}+ Design Assets
+            </motion.h1>
 
-        {/* Subtitle */}
-        <motion.p
-          className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-        >
-          The ultimate open-source marketplace for 3D Icons, Lottie Animations, Vector Illustrations, SVG Icons, Stickers & Emojis — all free and properly licensed.
-        </motion.p>
+            <motion.p
+              className="mt-5 max-w-2xl mx-auto md:mx-0 text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+            >
+              The ultimate open-source marketplace for 3D Icons, Lottie Animations, Vector Illustrations, SVG Icons, Stickers & Emojis — all free and properly licensed.
+            </motion.p>
+          </div>
+
+          <motion.div
+            className="order-first md:order-none mx-auto md:mx-0 w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 shrink-0"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            aria-hidden="true"
+          >
+            <LottiePreview url="/animal.json" alwaysPlay style={{ width: "100%", height: "100%" }} />
+          </motion.div>
+        </div>
 
         {/* Search bar */}
         <motion.form
