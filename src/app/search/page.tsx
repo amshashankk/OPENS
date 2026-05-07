@@ -1,8 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, useCallback, Suspense } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, Suspense } from "react";
+import { motion } from "framer-motion";
+import { useCachedFetch } from "@/lib/useCachedFetch";
 import AssetGridClean from "@/components/AssetGridClean";
 import CategoryTabs from "@/components/CategoryTabs";
 import Pagination from "@/components/Pagination";
@@ -35,31 +36,19 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q") || "";
   const categoryParam = searchParams.get("category") || "";
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchResults = useCallback(async () => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (q) params.set("q", q);
-    if (categoryParam) params.set("category", categoryParam);
-    params.set("page", String(page));
-    params.set("limit", "40");
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (categoryParam) params.set("category", categoryParam);
+  params.set("page", String(page));
+  params.set("limit", "40");
+  const url = `/api/search?${params}`;
+  const { data, loading } = useCachedFetch<{ assets: Asset[]; total: number; totalPages: number }>(url, { freshFor: 60_000 });
 
-    const res = await fetch(`/api/search?${params}`);
-    const data = await res.json();
-    setAssets(data.assets || []);
-    setTotal(data.total || 0);
-    setTotalPages(data.totalPages || 1);
-    setLoading(false);
-  }, [q, categoryParam, page]);
-
-  useEffect(() => {
-    fetchResults();
-  }, [fetchResults]);
+  const assets = data?.assets || [];
+  const total = data?.total || 0;
+  const totalPages = data?.totalPages || 1;
 
   // Group assets by category when no specific category is selected and there's a query
   const grouped = !categoryParam && q && !loading

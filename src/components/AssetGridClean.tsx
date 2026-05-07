@@ -9,7 +9,7 @@ interface Asset {
   id: string;
   title: string;
   previewUrl: string;
-  downloadUrl?: string;
+  downloadUrl?: string | null;
   category: string;
   tags: string[];
   license: string;
