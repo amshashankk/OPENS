@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Search,
   User,
@@ -21,7 +21,33 @@ export default function Navbar() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Derive an in-context category to scope searches to the current section.
+  // /category/<slug> → that slug. /search?category=<slug> → that slug. Else null.
+  // Avoids useSearchParams (which requires a Suspense boundary in Next 16).
+  const [searchCategoryQuery, setSearchCategoryQuery] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (pathname === "/search") {
+      setSearchCategoryQuery(new URLSearchParams(window.location.search).get("category"));
+    } else {
+      setSearchCategoryQuery(null);
+    }
+  }, [pathname]);
+  const contextCategory = (() => {
+    const m = pathname?.match(/^\/category\/([^/]+)/);
+    if (m) return m[1];
+    if (pathname === "/search") return searchCategoryQuery;
+    return null;
+  })();
+
+  const buildSearchUrl = (term: string) => {
+    const params = new URLSearchParams({ q: term });
+    if (contextCategory) params.set("category", contextCategory);
+    return `/search?${params.toString()}`;
+  };
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -35,16 +61,16 @@ export default function Navbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    if (navSearchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(navSearchQuery.trim())}`);
-    }
+    const term = navSearchQuery.trim();
+    if (term) router.push(buildSearchUrl(term));
   };
 
   const handleSuggestionSelect = useCallback((term: string) => {
     setNavSearchQuery(term);
     setShowSuggestions(false);
-    router.push(`/search?q=${encodeURIComponent(term)}`);
-  }, [router]);
+    router.push(buildSearchUrl(term));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, contextCategory]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });

@@ -7,6 +7,7 @@ import { useCachedFetch } from "@/lib/useCachedFetch";
 import AssetGridClean from "@/components/AssetGridClean";
 import CategoryTabs from "@/components/CategoryTabs";
 import Pagination from "@/components/Pagination";
+import OtherCategorySuggestions from "@/components/OtherCategorySuggestions";
 import Link from "next/link";
 import { Box, Paintbrush, Play, Layers, Sparkles, Smile, ArrowRight } from "lucide-react";
 
@@ -129,6 +130,12 @@ function SearchContent() {
         <div className="mt-8">
           <Pagination page={page} totalPages={totalPages} onPageChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
         </div>
+      )}
+
+      {/* When the user is filtered to a single category and has a query,
+          surface matching results from other categories at the bottom. */}
+      {q && categoryParam && !loading && (
+        <OtherCategorySuggestions query={q} excludeCategory={categoryParam} />
       )}
     </div>
   );
