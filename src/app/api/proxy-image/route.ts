@@ -45,6 +45,11 @@ export async function GET(req: NextRequest) {
     const headers: Record<string, string> = {
       "Content-Type": contentType,
       "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
+      // Netlify ignores arbitrary query params for cache key by default,
+      // collapsing all proxy responses onto one entry. Tell it to vary
+      // by `url`, `download`, and `filename` so each unique image / download
+      // gets its own cache entry.
+      "Netlify-Vary": "query=url|download|filename",
       "Access-Control-Allow-Origin": "*",
     };
 
