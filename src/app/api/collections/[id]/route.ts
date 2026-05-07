@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { dbGet, dbAll, dbRun } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { parseTags } from "@/lib/parseTags";
 
@@ -11,20 +11,24 @@ export async function GET(
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const collection = db.prepare(
-    "SELECT * FROM Collection WHERE id = ? AND userId = ?"
-  ).get(id, user.id) as Record<string, unknown> | undefined;
+  const collection = await dbGet<Record<string, unknown>>(
+    "SELECT * FROM Collection WHERE id = ? AND userId = ?",
+    [id, user.id]
+  );
 
   if (!collection) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const bookmarks = db.prepare(`
+  const bookmarks = await dbAll<Record<string, unknown>>(
+    `
     SELECT b.*, a.id as aId, a.title, a.previewUrl, a.category, a.tags, a.license, a.fileFormat, a.downloads, a.animated, a.featured
     FROM Bookmark b JOIN Asset a ON b.assetId = a.id
     WHERE b.collectionId = ?
     ORDER BY b.createdAt DESC
-  `).all(id) as Record<string, unknown>[];
+  `,
+    [id]
+  );
 
   return NextResponse.json({
     collection: {
@@ -54,6 +58,6 @@ export async function DELETE(
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  db.prepare("DELETE FROM Collection WHERE id = ? AND userId = ?").run(id, user.id);
+  await dbRun("DELETE FROM Collection WHERE id = ? AND userId = ?", [id, user.id]);
   return NextResponse.json({ success: true });
 }

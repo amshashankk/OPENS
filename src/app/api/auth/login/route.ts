@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { dbGet } from "@/lib/db";
 import { verifyPassword, createToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -10,7 +10,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Email and password required" }, { status: 400 });
   }
 
-  const user = db.prepare("SELECT * FROM User WHERE email = ?").get(email) as Record<string, unknown> | undefined;
+  const user = await dbGet<Record<string, unknown>>(
+    "SELECT * FROM User WHERE email = ?",
+    [email]
+  );
   if (!user) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }

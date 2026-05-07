@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { dbGet, dbAll, dbRun } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { parseTags } from "@/lib/parseTags";
 import { randomBytes } from "crypto";
@@ -7,16 +7,24 @@ import { randomBytes } from "crypto";
 export async function POST(request: NextRequest) {
   const { assetId } = await request.json();
 
-  db.prepare("UPDATE Asset SET downloads = downloads + 1 WHERE id = ?").run(assetId);
-  const asset = db.prepare("SELECT * FROM Asset WHERE id = ?").get(assetId) as Record<string, unknown>;
+  await dbRun("UPDATE Asset SET downloads = downloads + 1 WHERE id = ?", [assetId]);
+  const asset = await dbGet<Record<string, unknown>>(
+    "SELECT * FROM Asset WHERE id = ?",
+    [assetId]
+  );
+
+  if (!asset) {
+    return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+  }
 
   const user = await getCurrentUser();
   if (user) {
     const id = "c" + randomBytes(12).toString("hex");
     const now = new Date().toISOString();
-    db.prepare(
-      "INSERT INTO Download (id, userId, assetId, createdAt) VALUES (?, ?, ?, ?)"
-    ).run(id, user.id, assetId, now);
+    await dbRun(
+      "INSERT INTO Download (id, userId, assetId, createdAt) VALUES (?, ?, ?, ?)",
+      [id, user.id, assetId, now]
+    );
   }
 
   return NextResponse.json({
@@ -29,12 +37,15 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const downloads = db.prepare(`
+  const downloads = await dbAll<Record<string, unknown>>(
+    `
     SELECT d.createdAt as downloadedAt, a.*
     FROM Download d JOIN Asset a ON d.assetId = a.id
     WHERE d.userId = ?
     ORDER BY d.createdAt DESC LIMIT 50
-  `).all(user.id) as Record<string, unknown>[];
+  `,
+    [user.id]
+  );
 
   return NextResponse.json({
     downloads: downloads.map((d) => ({

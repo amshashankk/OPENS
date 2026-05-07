@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
-import { db } from "./db";
+import { dbGet } from "./db";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "opens-dev-secret";
 
@@ -33,9 +33,10 @@ export async function getCurrentUser() {
   const decoded = verifyToken(token);
   if (!decoded) return null;
 
-  const user = db.prepare(
-    "SELECT id, name, email, bio, avatar, createdAt FROM User WHERE id = ?"
-  ).get(decoded.userId) as { id: string; name: string | null; email: string; bio: string | null; avatar: string | null; createdAt: string } | undefined;
+  const user = await dbGet<{ id: string; name: string | null; email: string; bio: string | null; avatar: string | null; createdAt: string }>(
+    "SELECT id, name, email, bio, avatar, createdAt FROM User WHERE id = ?",
+    [decoded.userId]
+  );
 
   return user || null;
 }
