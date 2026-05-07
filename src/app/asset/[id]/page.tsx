@@ -87,6 +87,10 @@ export default function AssetDetailPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ assetId: asset.id }),
     });
+    if (res.status === 401) {
+      router.push(`/auth/login?redirect=${encodeURIComponent(`/asset/${asset.id}`)}`);
+      return;
+    }
     const data = await res.json();
     let url = data.downloadUrl || asset.downloadUrl || asset.previewUrl;
     if (format && url.includes("iconify.design")) {

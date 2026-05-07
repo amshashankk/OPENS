@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   const url = req.nextUrl.searchParams.get("url");
@@ -6,6 +7,13 @@ export async function GET(req: NextRequest) {
   const filename = req.nextUrl.searchParams.get("filename");
 
   if (!url) return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
+
+  if (download) {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Login required to download" }, { status: 401 });
+    }
+  }
 
   // Allow proxy for known safe domains
   const allowed = ["img.icons8.com", "icons8.com", "maxst.icons8.com", "api.iconify.design", "www.svgrepo.com", "svgrepo.com"];

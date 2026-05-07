@@ -5,6 +5,11 @@ import { parseTags } from "@/lib/parseTags";
 import { randomBytes } from "crypto";
 
 export async function POST(request: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Login required to download" }, { status: 401 });
+  }
+
   const { assetId } = await request.json();
 
   await dbRun("UPDATE Asset SET downloads = downloads + 1 WHERE id = ?", [assetId]);
@@ -17,15 +22,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Asset not found" }, { status: 404 });
   }
 
-  const user = await getCurrentUser();
-  if (user) {
-    const id = "c" + randomBytes(12).toString("hex");
-    const now = new Date().toISOString();
-    await dbRun(
-      "INSERT INTO Download (id, userId, assetId, createdAt) VALUES (?, ?, ?, ?)",
-      [id, user.id, assetId, now]
-    );
-  }
+  const id = "c" + randomBytes(12).toString("hex");
+  const now = new Date().toISOString();
+  await dbRun(
+    "INSERT INTO Download (id, userId, assetId, createdAt) VALUES (?, ?, ?, ?)",
+    [id, user.id, assetId, now]
+  );
 
   return NextResponse.json({
     downloadUrl: asset.downloadUrl || asset.sourceUrl,
