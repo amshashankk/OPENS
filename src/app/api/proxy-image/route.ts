@@ -15,8 +15,19 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Allow proxy for known safe domains
-  const allowed = ["img.icons8.com", "icons8.com", "maxst.icons8.com", "api.iconify.design", "www.svgrepo.com", "svgrepo.com"];
+  // Allow proxy for known safe domains we ingest from. Suffix match, so
+  // "lottiefiles.com" covers "assets-v2.lottiefiles.com" etc.
+  const allowed = [
+    "icons8.com",          // img.icons8.com, maxst.icons8.com
+    "api.iconify.design",
+    "svgrepo.com",         // www.svgrepo.com
+    "lottiefiles.com",     // assets-v2.lottiefiles.com (44k Lottie JSONs)
+    "thenounproject.com",  // static.thenounproject.com (12.5k icons)
+    "unpkg.com",           // lucide-static (6.7k icons)
+    "jsdelivr.net",        // cdn.jsdelivr.net (4.5k icons)
+    "supabase.co",         // bvconuycpdvgzbvbkijl.supabase.co (792 assets)
+    "lordicon.com",        // api.lordicon.com (68 animated icons)
+  ];
   try {
     const parsed = new URL(url);
     if (!allowed.some(d => parsed.hostname.endsWith(d))) {
