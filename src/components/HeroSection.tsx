@@ -103,7 +103,7 @@ export default function HeroSection({ totalAssets }: { totalAssets: number }) {
           </div>
 
           <motion.div
-            className="order-first md:order-none mx-auto md:mx-0 w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 shrink-0"
+            className="mx-auto md:mx-0 w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 shrink-0"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
