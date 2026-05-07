@@ -6,18 +6,32 @@ import { CATEGORIES } from "@/lib/categories";
 import { parseTags } from "@/lib/parseTags";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function Home() {
-  const totalRow = await dbGet<{ c: number }>("SELECT COUNT(*) as c FROM Asset");
-  const totalAssets = totalRow?.c ?? 0;
+  const [totalRow, countRows, lottieGif, featured, ...catResults] = await Promise.all([
+    dbGet<{ c: number }>("SELECT COUNT(*) as c FROM Asset"),
+    dbAll<{ category: string; count: number }>(
+      "SELECT category, COUNT(*) as count FROM Asset GROUP BY category"
+    ),
+    dbGet<{ previewUrl: string }>(
+      "SELECT previewUrl FROM Asset WHERE category = 'lottie' AND previewUrl LIKE '%.gif' ORDER BY downloads DESC LIMIT 1"
+    ),
+    dbAll<Record<string, unknown>>(
+      "SELECT * FROM Asset WHERE featured = 1 GROUP BY previewUrl ORDER BY downloads DESC LIMIT 12"
+    ),
+    ...CATEGORIES.map((cat) =>
+      dbAll<Record<string, unknown>>(
+        "SELECT * FROM Asset WHERE category = ? GROUP BY title ORDER BY downloads DESC LIMIT 6",
+        [cat.slug]
+      )
+    ),
+  ]);
 
-  const countRows = await dbAll<{ category: string; count: number }>(
-    "SELECT category, COUNT(*) as count FROM Asset GROUP BY category"
-  );
+  const totalAssets = totalRow?.c ?? 0;
   const categoryCounts: Record<string, number> = {};
   for (const row of countRows) categoryCounts[row.category] = row.count;
 
-  const categoryPreviews: Record<string, string[]> = {};
   const featuredPreviews: Record<string, string> = {
     "3d-assets": "https://api.iconify.design/noto-v1/rocket.svg",
     "lottie": "",
@@ -26,26 +40,17 @@ export default async function Home() {
     "animated-icons": "https://api.iconify.design/fluent-emoji-flat/sparkles.svg",
     "stickers": "https://api.iconify.design/fluent-emoji/smiling-face-with-heart-eyes.svg",
   };
-  const lottieGif = await dbGet<{ previewUrl: string }>(
-    "SELECT previewUrl FROM Asset WHERE category = 'lottie' AND previewUrl LIKE '%.gif' ORDER BY RANDOM() LIMIT 1"
-  );
   if (lottieGif) featuredPreviews["lottie"] = lottieGif.previewUrl;
 
+  const categoryPreviews: Record<string, string[]> = {};
   for (const cat of CATEGORIES) {
     categoryPreviews[cat.slug] = featuredPreviews[cat.slug] ? [featuredPreviews[cat.slug]] : [];
   }
 
-  const featured = await dbAll<Record<string, unknown>>(
-    "SELECT * FROM Asset WHERE featured = 1 ORDER BY downloads DESC LIMIT 12"
-  );
-
   const categoryAssets: Record<string, Record<string, unknown>[]> = {};
-  for (const cat of CATEGORIES) {
-    categoryAssets[cat.slug] = await dbAll<Record<string, unknown>>(
-      "SELECT * FROM Asset WHERE category = ? ORDER BY downloads DESC LIMIT 6",
-      [cat.slug]
-    );
-  }
+  CATEGORIES.forEach((cat, i) => {
+    categoryAssets[cat.slug] = catResults[i] ?? [];
+  });
 
   const parse = (a: Record<string, unknown>) => ({
     ...a,
