@@ -58,7 +58,7 @@ interface AssetDetail {
 export default function AssetDetailPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
-  const { user, bookmarkedAssetIds, addBookmark, removeBookmark } = useStore();
+  const { user, bookmarkedAssetIds, addBookmark, removeBookmark, openLoginModal } = useStore();
   const [asset, setAsset] = useState<AssetDetail | null>(null);
   const [similar, setSimilar] = useState([]);
   const [related, setRelated] = useState([]);
@@ -88,7 +88,7 @@ export default function AssetDetailPage() {
       body: JSON.stringify({ assetId: asset.id }),
     });
     if (res.status === 401) {
-      router.push(`/auth/login?redirect=${encodeURIComponent(`/asset/${asset.id}`)}`);
+      openLoginModal();
       return;
     }
     const data = await res.json();

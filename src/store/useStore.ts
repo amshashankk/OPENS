@@ -21,6 +21,9 @@ interface AppState {
   addBookmark: (assetId: string) => void;
   removeBookmark: (assetId: string) => void;
   setBookmarks: (ids: string[]) => void;
+  loginModalOpen: boolean;
+  openLoginModal: () => void;
+  closeLoginModal: () => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -42,4 +45,7 @@ export const useStore = create<AppState>((set) => ({
       return { bookmarkedAssetIds: next };
     }),
   setBookmarks: (ids) => set({ bookmarkedAssetIds: new Set(ids) }),
+  loginModalOpen: false,
+  openLoginModal: () => set({ loginModalOpen: true }),
+  closeLoginModal: () => set({ loginModalOpen: false }),
 }));
