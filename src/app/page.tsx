@@ -18,11 +18,11 @@ export default async function Home() {
       "SELECT previewUrl FROM Asset WHERE category = 'lottie' AND previewUrl LIKE '%.gif' ORDER BY downloads DESC LIMIT 1"
     ),
     dbAll<Record<string, unknown>>(
-      "SELECT * FROM Asset WHERE featured = 1 GROUP BY previewUrl ORDER BY downloads DESC LIMIT 12"
+      "SELECT * FROM (SELECT * FROM Asset WHERE featured = 1 ORDER BY downloads DESC LIMIT 50) GROUP BY previewUrl LIMIT 12"
     ),
     ...CATEGORIES.map((cat) =>
       dbAll<Record<string, unknown>>(
-        "SELECT * FROM Asset WHERE category = ? GROUP BY title ORDER BY downloads DESC LIMIT 6",
+        "SELECT * FROM (SELECT * FROM Asset WHERE category = ? ORDER BY downloads DESC LIMIT 60) GROUP BY title LIMIT 6",
         [cat.slug]
       )
     ),
