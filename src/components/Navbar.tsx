@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Search,
   User,
@@ -22,15 +22,24 @@ export default function Navbar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Derive an in-context category to scope searches to the current section.
   // /category/<slug> → that slug. /search?category=<slug> → that slug. Else null.
+  // Avoids useSearchParams (which requires a Suspense boundary in Next 16).
+  const [searchCategoryQuery, setSearchCategoryQuery] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (pathname === "/search") {
+      setSearchCategoryQuery(new URLSearchParams(window.location.search).get("category"));
+    } else {
+      setSearchCategoryQuery(null);
+    }
+  }, [pathname]);
   const contextCategory = (() => {
     const m = pathname?.match(/^\/category\/([^/]+)/);
     if (m) return m[1];
-    if (pathname === "/search") return searchParams?.get("category") || null;
+    if (pathname === "/search") return searchCategoryQuery;
     return null;
   })();
 
